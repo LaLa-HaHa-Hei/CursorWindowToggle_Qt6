@@ -54,7 +54,7 @@ private:
     // 遍历所有窗口，显示到表格中
     static BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam);
     // 鼠标钩子回调函数
-    static LRESULT CALLBACK HookCallback(int code, WPARAM wParam, LPARAM lParam);
+    static LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam);
     // 隐藏目标窗口
     static void HideTargetWindow(HWND hwnd, bool byTransparency);
     // 显示目标窗口

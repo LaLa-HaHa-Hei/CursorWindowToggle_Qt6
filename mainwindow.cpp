@@ -138,7 +138,7 @@ void MainWindow::on_pushButtonStart_clicked()
         return;
     }
 
-    _hookId = SetWindowsHookEx(WH_MOUSE_LL, HookCallback, nullptr, 0); //(HWND)winId()?
+    _hookId = SetWindowsHookEx(WH_MOUSE_LL, LowLevelMouseProc, nullptr, 0); //(HWND)winId()?
     if (_hookId == nullptr)
     {
         QMessageBox::critical(this, "错误", QString("安装钩子失败！错误码: %1").arg(GetLastError()));
@@ -148,17 +148,24 @@ void MainWindow::on_pushButtonStart_clicked()
 
 void MainWindow::on_pushButtonStop_clicked()
 {
-    if(UnhookWindowsHookEx(_hookId))
+    if (_hookId == nullptr)
     {
-        _hookId = nullptr;
+        QMessageBox::about(this, "错误", "鼠标钩子尚未安装");
     }
     else
     {
-        QMessageBox::critical(this, "错误", QString("卸载钩子失败！错误码: %1").arg(GetLastError()));
+        if(UnhookWindowsHookEx(_hookId))
+        {
+            _hookId = nullptr;
+        }
+        else
+        {
+            QMessageBox::critical(this, "错误", QString("卸载钩子失败！错误码: %1").arg(GetLastError()));
+        }
     }
 }
 
-LRESULT CALLBACK MainWindow::HookCallback(int nCode, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK MainWindow::LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
     if (nCode == HC_ACTION && wParam == WM_MOUSEMOVE && g_mainWindowInstance->_targetWindowHandleList.size() != 0)
     {
@@ -191,14 +198,12 @@ void MainWindow::on_actionOpenWorkingDir_triggered()
     QProcess::startDetached("explorer", QStringList() << workingDir);
 }
 
-
 void MainWindow::on_actionOpenAppDir_triggered()
 {
     QString exeDir = QCoreApplication::applicationDirPath();
     exeDir.replace("/", "\\");
     QProcess::startDetached("explorer", QStringList() << exeDir);
 }
-
 
 void MainWindow::on_actionOpenAboutDialog_triggered()
 {
